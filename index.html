@@ -302,6 +302,9 @@
                 this.updateDisplay();
                 this.showAnnouncement('🏃‍♂️ Start Running! 4 minutes');
                 this.speak('Start running for 4 minutes');
+                
+                // Keep screen awake during workout
+                requestWakeLock();
             }
             
             stop() {
@@ -316,6 +319,9 @@
                 }
                 
                 this.showAnnouncement('Workout stopped');
+                
+                // Release wake lock
+                releaseWakeLock();
             }
             
             startGPSTracking() {
@@ -479,6 +485,27 @@
         }
         
         // Initialize the app when the page loads
+        // Keep screen awake
+        let wakeLock = null;
+        
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Screen wake lock activated');
+                }
+            } catch (err) {
+                console.log('Wake lock not supported:', err);
+            }
+        }
+        
+        function releaseWakeLock() {
+            if (wakeLock) {
+                wakeLock.release();
+                wakeLock = null;
+            }
+        }
+        
         window.addEventListener('load', () => {
             new HalfMarathonTrainer();
         });
